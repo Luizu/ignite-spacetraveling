@@ -41,4 +41,19 @@
   svg {
     margin-right: 0.3rem;
   }
+
+  .loadMore {
+    margin-top: 4rem;
+    color: var(--pink-500);
+    font-size: 1.125rem;
+    border: 0;
+    background: transparent;
+    line-height: 1.375rem;
+
+    transition: filter 0.2s;
+
+    &:hover {
+      filter: brightness(0.8);
+    }
+  }
 }
