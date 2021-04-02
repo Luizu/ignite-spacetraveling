@@ -35,7 +35,20 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
-  const [posts, setPosts] = useState(postsPagination.results);
+  const formattedPost = postsPagination.results.map(post => {
+    return {
+      ...post,
+      first_publication_date: format(
+        new Date(post.first_publication_date),
+        'dd MMM yyyy',
+        {
+          locale: ptBR,
+        }
+      ),
+    };
+  });
+
+  const [posts, setPosts] = useState(formattedPost);
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -54,7 +67,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
       return {
         uid: post.uid,
         data: {
-          title: RichText.asText(post.data.title),
+          title: post.data.title,
           subtitle: post.data.subtitle,
           author: post.data.author,
         },
@@ -118,6 +131,7 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.predicates.at('document.type', 'posts')],
     {
       pageSize: 20,
+      orderings: '[document.last_publication_date desc]',
     }
   );
   const nextPage = postsResponse.next_page;
@@ -125,18 +139,13 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
+      first_publication_date: post.first_publication_date,
+      last_publication_date: post.last_publication_date,
       data: {
-        title: RichText.asText(post.data.title),
+        title: post.data.title,
         subtitle: post.data.subtitle,
         author: post.data.author,
       },
-      first_publication_date: format(
-        new Date(post.first_publication_date),
-        'dd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
     };
   });
 
