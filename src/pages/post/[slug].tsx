@@ -3,6 +3,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { RichText } from 'prismic-dom';
+import Prismic from '@prismicio/client';
 import Head from 'next/head';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import { useRouter } from 'next/router';
@@ -51,6 +52,14 @@ export default function Post({ post }: PostProps): JSX.Element {
 
   const readingTime = Math.ceil(totalWords / 200);
 
+  const formatedDate = format(
+    new Date(post.first_publication_date),
+    'dd MMM yyyy',
+    {
+      locale: ptBR,
+    }
+  );
+
   return (
     <>
       <Head>
@@ -73,7 +82,7 @@ export default function Post({ post }: PostProps): JSX.Element {
 
           <div className={styles.postInfo}>
             <time>
-              <FiCalendar /> {post.first_publication_date}
+              <FiCalendar /> {formatedDate}
             </time>
             <span>
               <FiUser /> {post.data.author}
@@ -102,11 +111,21 @@ export default function Post({ post }: PostProps): JSX.Element {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  // const prismic = getPrismicClient();
-  // const posts = await prismic.query(TODO);
+  const prismic = getPrismicClient();
+  const posts = await prismic.query([
+    Prismic.Predicates.at('document.type', 'posts'),
+  ]);
+
+  const paths = posts.results.map(post => {
+    return {
+      params: {
+        slug: post.uid,
+      },
+    };
+  });
 
   return {
-    paths: [],
+    paths,
     fallback: 'blocking',
   };
 };
@@ -118,17 +137,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const response = await prismic.getByUID('posts', String(slug), {});
 
   const post = {
-    first_publication_date: format(
-      new Date(response.first_publication_date),
-      'dd MMM yyyy',
-      { locale: ptBR }
-    ),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
-      title: RichText.asText(response.data.title),
+      title: response.data.title,
+      subtitle: response.data.subtitle,
+      author: response.data.author,
       banner: {
         url: response.data.banner.url,
       },
-      author: response.data.author,
       content: response.data.content.map(content => {
         return {
           heading: content.heading,
@@ -140,5 +158,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: { post },
+    // revalidate: 60 * 30, // 30 minutes
   };
 };
