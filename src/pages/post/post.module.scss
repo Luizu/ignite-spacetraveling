@@ -1,1 +1,42 @@
-// TODO
+.banner {
+  width: 100%;
+}
+
+.content {
+  h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    line-height: 3.625rem;
+  }
+
+  .postInfo {
+    margin-top: 1.5rem;
+    color: var(--gray-150);
+
+    span {
+      margin-left: 1rem;
+    }
+
+    svg {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .postContent {
+    h2 {
+      margin: 4rem 0;
+      font-size: 2.25rem;
+      line-height: 3.125rem;
+      font-weight: bold;
+      color: var(--white);
+    }
+
+    p, ul {
+      color: var(--gray-150);
+      font-size: 1.125rem;
+      line-height: 1.5rem;
+    }
+
+    margin-bottom: 4rem;
+  }
+}
