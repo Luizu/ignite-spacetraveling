@@ -5,7 +5,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser } from 'react-icons/fi';
-import { RichText } from 'prismic-dom';
 
 import { useState } from 'react';
 import Header from '../components/Header';
