@@ -2,9 +2,11 @@ import { GetStaticProps } from 'next';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import Head from 'next/head';
+import Link from 'next/link';
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import { RichText } from 'prismic-dom';
+
 import Header from '../components/Header';
 
 import { getPrismicClient } from '../services/prismic';
@@ -43,16 +45,18 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
         <div className={`${commonStyles.contentContainer} ${styles.content}`}>
           {postsPagination.results.map(post => {
             return (
-              <a key={post.uid}>
-                <h1>{post.data.title}</h1>
-                <p>{post.data.subtitle}</p>
-                <time>
-                  <FiCalendar /> {post.first_publication_date}
-                </time>
-                <span>
-                  <FiUser /> {post.data.author}
-                </span>
-              </a>
+              <Link key={post.uid} href={`/post/${post.uid}`}>
+                <a>
+                  <h1>{post.data.title}</h1>
+                  <p>{post.data.subtitle}</p>
+                  <time>
+                    <FiCalendar /> {post.first_publication_date}
+                  </time>
+                  <span>
+                    <FiUser /> {post.data.author}
+                  </span>
+                </a>
+              </Link>
             );
           })}
         </div>
