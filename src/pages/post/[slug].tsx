@@ -5,6 +5,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { RichText } from 'prismic-dom';
 import Head from 'next/head';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import { useRouter } from 'next/router';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -33,6 +34,23 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): JSX.Element {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <h1>Carregando...</h1>;
+  }
+
+  const totalWords = post.data.content.reduce((total, contentItem) => {
+    total += contentItem.heading.split(' ').length;
+
+    const words = contentItem.body.map(item => item.text.split(' ').length);
+    words.map(word => (total += word));
+
+    return total;
+  }, 0);
+
+  const readingTime = Math.ceil(totalWords / 200);
+
   return (
     <>
       <Head>
@@ -61,7 +79,7 @@ export default function Post({ post }: PostProps): JSX.Element {
               <FiUser /> {post.data.author}
             </span>
             <span>
-              <FiClock /> 4 min
+              <FiClock /> {readingTime} min
             </span>
           </div>
 
