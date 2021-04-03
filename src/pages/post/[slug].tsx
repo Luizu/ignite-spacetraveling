@@ -7,14 +7,18 @@ import Prismic from '@prismicio/client';
 import Head from 'next/head';
 import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Header from '../../components/Header';
+import { Comments } from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
+  uid: string;
   data: {
     title: string;
     banner: {
@@ -32,9 +36,19 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
+  nextPost: Post | null;
+  prevPost: Post | null;
+  wasEdited: boolean;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  preview,
+  nextPost,
+  prevPost,
+  wasEdited,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -90,6 +104,19 @@ export default function Post({ post }: PostProps): JSX.Element {
             <span>
               <FiClock /> {readingTime} min
             </span>
+
+            {wasEdited && (
+              <div className={styles.editInfo}>
+                * Editado em{' '}
+                {format(
+                  new Date(post.first_publication_date),
+                  "dd MMM yyyy, 'às' HH:mm",
+                  {
+                    locale: ptBR,
+                  }
+                )}
+              </div>
+            )}
           </div>
 
           {post.data.content.map(content => {
@@ -105,6 +132,39 @@ export default function Post({ post }: PostProps): JSX.Element {
             );
           })}
         </section>
+
+        <footer className={`${commonStyles.container} ${styles.footer}`}>
+          <nav>
+            <div>
+              {prevPost && (
+                <Link href={`/post/${prevPost.uid}`}>
+                  <a className={styles.previous}>
+                    <span>{prevPost.data.title}</span>
+                    Post anterior
+                  </a>
+                </Link>
+              )}
+            </div>
+            <div>
+              {nextPost && (
+                <Link href={`/post/${nextPost.uid}`}>
+                  <a className={styles.next}>
+                    <span>{nextPost.data.title}</span>
+                    Próximo post
+                  </a>
+                </Link>
+              )}
+            </div>
+          </nav>
+          {preview && (
+            <aside className={commonStyles.exitPreview}>
+              <Link href="/api/exit-preview">
+                <a>Sair do modo Preview</a>
+              </Link>
+            </aside>
+          )}
+          {!preview && <Comments />}
+        </footer>
       </main>
     </>
   );
@@ -130,13 +190,23 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
+
+  const wasEdited =
+    response.last_publication_date > response.first_publication_date;
 
   const post = {
+    post: response.id,
     uid: response.uid,
     first_publication_date: response.first_publication_date,
     last_publication_date: response.last_publication_date,
@@ -156,8 +226,32 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     },
   };
 
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date desc]',
+    }
+  );
+
   return {
-    props: { post },
+    props: {
+      post,
+      preview,
+      wasEdited,
+      prevPost: prevPost?.results[0] || null,
+      nextPost: nextPost?.results[0] || null,
+    },
     revalidate: 60 * 30, // 30 minutes
   };
 };
