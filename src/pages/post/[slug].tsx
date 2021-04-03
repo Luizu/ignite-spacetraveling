@@ -12,6 +12,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Header from '../../components/Header';
+import { Comments } from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
@@ -105,6 +106,8 @@ export default function Post({ post }: PostProps): JSX.Element {
             );
           })}
         </section>
+
+        <Comments />
       </main>
     </>
   );
