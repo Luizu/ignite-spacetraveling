@@ -31,12 +31,49 @@
       color: var(--white);
     }
 
-    p, ul {
+    p,
+    ul {
       color: var(--gray-150);
       font-size: 1.125rem;
       line-height: 1.5rem;
     }
 
     margin-bottom: 4rem;
+  }
+}
+
+.footer {
+  border-top: 1px solid rgba(215, 215, 215, 0.1);
+
+  nav {
+    display: grid;
+    grid-template-columns: repeat(2, 0.5fr);
+
+    padding: 5rem 0;
+
+    a {
+      display: grid;
+
+      font-size: 1rem;
+      line-height: 1.2rem;
+      font-weight: bold;
+      color: var(--pink-500);
+
+      & > span {
+        display: block;
+        color: var(--white);
+        font-size: 1.125rem;
+        line-height: 1.3rem;
+
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  .prev {
+    text-align: left;
+  }
+  .next {
+    text-align: right;
   }
 }
