@@ -39,6 +39,7 @@ interface PostProps {
   preview: boolean;
   nextPost: Post | null;
   prevPost: Post | null;
+  wasEdited: boolean;
 }
 
 export default function Post({
@@ -46,6 +47,7 @@ export default function Post({
   preview,
   nextPost,
   prevPost,
+  wasEdited,
 }: PostProps): JSX.Element {
   const router = useRouter();
 
@@ -102,6 +104,19 @@ export default function Post({
             <span>
               <FiClock /> {readingTime} min
             </span>
+
+            {wasEdited && (
+              <div className={styles.editInfo}>
+                * Editado em{' '}
+                {format(
+                  new Date(post.first_publication_date),
+                  "dd MMM yyyy, 'às' HH:mm",
+                  {
+                    locale: ptBR,
+                  }
+                )}
+              </div>
+            )}
           </div>
 
           {post.data.content.map(content => {
@@ -187,6 +202,9 @@ export const getStaticProps: GetStaticProps = async ({
     ref: previewData?.ref ?? null,
   });
 
+  const wasEdited =
+    response.last_publication_date > response.first_publication_date;
+
   const post = {
     post: response.id,
     uid: response.uid,
@@ -230,6 +248,7 @@ export const getStaticProps: GetStaticProps = async ({
     props: {
       post,
       preview,
+      wasEdited,
       prevPost: prevPost?.results[0] || null,
       nextPost: nextPost?.results[0] || null,
     },
