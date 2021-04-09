@@ -8,4 +8,29 @@
 .contentContainer {
   max-width: 720px;
   margin: 5rem auto 0;
+  padding-bottom: 2rem;
+}
+
+.exitPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin: 0 auto 5rem;
+  background: var(--white);
+  width: 700px;
+  height: 58px;
+
+  a {
+    text-decoration: none;
+    color: var(--black-800);
+    font-weight: bold;
+    font-size: 1.125rem;
+  }
+
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(0.8);
+  }
 }
